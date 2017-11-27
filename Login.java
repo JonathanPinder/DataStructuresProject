@@ -1,24 +1,10 @@
 //	Login Screen GUI
 
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Scanner;
-
-
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.event.*;
+import java.util.*;
 
 public class Login extends JFrame {
 	
@@ -79,8 +65,8 @@ public class Login extends JFrame {
 		firstPanel.add(loginLabel);
 		
 		secondPanel.add(loginButton);
-		secondPanel.add(exitButton);
 		secondPanel.add(signupButton);
+		secondPanel.add(exitButton);
 		
 		myPanel.add(firstPanel);
 		
@@ -122,28 +108,17 @@ public class Login extends JFrame {
 	
 	/*	loginButton takes the text from usernameText and passwordText
 		This is where the database should be accessed from
+		The MainGUI myMain = new MainGUI(string, string) should only execute if there is a user with
+		 that password in the database
+		else it should do nothing or give out an error message
+		username and password are passed through to MainGUI
 	*/
 	private class loginButton implements ActionListener {
-		public void actionPerformed(ActionEvent e) {
-			try {
-				
-				// Get a connection to a database and create a statement
-				String url = "jdbc:sqlserver://localhost:1433;databaseName=App_DB;integratedSecurity=true;";
-				Connection conn = DriverManager.getConnection(url);
-				Statement sta = conn.createStatement();
-				
-				//username query. Set the username equal to the input and set that where the user's name is equal to Yoel in the db
-				String username = usernameText.getText();
-				String userNameQuery = "update User_Table set userName = " + "'" + username + "'" + " where userNameFL = " + "'Yoel'";
-				boolean in5 = sta.execute(userNameQuery);
-				
-				String password = passwordText.getText();
-				String userPassQuery = "update User_Table set userPass = " + "'" + password + "'" + " where userNameFL = " + "'Yoel'";
-				boolean in6 = sta.execute(userPassQuery);
-				
-			} catch (Exception exc) {
-				exc.printStackTrace();
-			}
+		public void actionPerformed (ActionEvent e) {
+			String username = usernameText.getText();
+			String password = new String(passwordText.getPassword());
+			MainGUI myMain = new MainGUI(username, password);
+			
 		}
 	}
 	
