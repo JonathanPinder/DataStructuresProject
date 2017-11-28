@@ -1,36 +1,39 @@
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.event.*;
-import java.util.*;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
 
 public class SignUp extends JFrame {
-		
-	//	Declaring Textfields
+
+	// Declaring Textfields
 	private JTextField firstNameText;
+	private JTextField lastNameText;
 	private JTextField ageText;
 	private JTextField emailText;
 	private JTextField usernameText;
-	
-	//	Declaring PasswordField
+
+	// Declaring PasswordField
 	private JPasswordField passwordText;
-	
-	//	Declaring Buttons
+
+	// Declaring Buttons
 	private JButton exitButton;
 	private JButton continueButton;
-	
+
 	final int FRAME_WIDTH;
 	final int FRAME_LENGTH;
-	
-	//	Constructor creates frame and everything in it
+
+	// Constructor creates frame and everything in it
 	public SignUp() {
-		
+
 		FRAME_WIDTH = 300;
 		FRAME_LENGTH = 450;
-		
-		//	Creating Textfields
-		//	.setBounds uses (x, y, width, height);
+	
 		firstNameText = new JTextField("Enter Your Name!");
 		firstNameText.setBounds(50, 50, 150, 20);
 
@@ -51,56 +54,81 @@ public class SignUp extends JFrame {
 		
 		continueButton = new JButton("Continue");
 		continueButton.setBounds(50, 350, 100, 25);
-		
-		
-		//	Adding components to frame
+
 		add(firstNameText);
 		add(ageText);
 		add(emailText);
 		add(usernameText);
 		add(passwordText);
-		
+
 		add(continueButton);
-		add(exitButton);		
-		
-		//	Adding action listeners to buttons
+		add(exitButton);
+
 		exitButton exitListener = new exitButton();
 		exitButton.addActionListener(exitListener);
-		
+
 		continueButton continueListener = new continueButton();
 		continueButton.addActionListener(continueListener);
-		
-		//	Finalizing Frame
-		
-		setLayout(null);	//	setLayout is null because of we are using .setBounds
+
+		setLayout(null);
 		setTitle("Sign Up");
 		setSize(FRAME_WIDTH, FRAME_LENGTH);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
+
 		setVisible(true);
 	}
-	
-	//	Action Listeners
-	
-	//	Disposes of frame on click
+
+	// Action Listeners
+
+	// Disposes of frame on click
 	private class exitButton implements ActionListener {
-		public void actionPerformed (ActionEvent e) {
+		public void actionPerformed(ActionEvent e) {
 			dispose();
 		}
 	}
-	
-	//	This is where Button creates user in database
-	//	Throws error is no number in ageText
-	//	Try catch?
+
+	// This is where Button creates user in database
 	private class continueButton implements ActionListener {
-		public void actionPerformed (ActionEvent e) {
-			String firstName = firstNameText.getText();
-			int age = Integer.parseInt(ageText.getText());
-			String email = emailText.getText();
-			String username = usernameText.getText();
-			String password = new String(passwordText.getPassword());
-			
-			
+		public void actionPerformed(ActionEvent e) {
+			try {
+				
+				String url = "jdbc:sqlserver://localhost:1433;databaseName=App_DB;integratedSecurity=true;";
+				Connection conn = DriverManager.getConnection(url);
+				Statement sta = conn.createStatement();
+				
+				String firstName = firstNameText.getText();
+				String userNameFLQuery = "insert into User_Table (userNameFL) values ('" + firstName + "')";
+				boolean in1 = sta.execute(userNameFLQuery);
+				
+				
+				int age = Integer.parseInt(ageText.getText());
+				String userAgeQuery = "update User_Table set userAge = " + age + " where userNameFL = " + "'" + firstName + "'";
+				boolean in2 = sta.execute(userAgeQuery);
+				
+				
+				String email = emailText.getText();
+				String userEmailQuery = "update User_Table set userEmail = " + "'" + email + "'" + " where userNameFL = " + "'" + firstName + "'";
+				boolean in3 = sta.execute(userEmailQuery);
+				
+				String username = usernameText.getText();
+				String userNameQuery = "update User_Table set userName = " + "'" + username + "'" + " where userNameFL = " + "'" + firstName + "'";
+				boolean in5 = sta.execute(userNameQuery);
+				
+				//create user specific table based on  their user name and generate the columns in that table: ID, monthly salary, and monthly goal. 
+				String userTable = "CREATE TABLE " +  username + " (ID int, Monthly_Salary FLOAT, Monthly_Goal FLOAT);";
+				boolean in8 = sta.execute(userTable);
+				String userID = "insert into " + username + " (ID) values ('1')";
+				boolean in = sta.execute(userID);
+				
+				String password = new String(passwordText.getPassword());
+				String userPassQuery = "update User_Table set userPass = " + "'" + password + "'" + " where userNameFL = " + "'" + firstName + "'";
+				boolean in6 = sta.execute(userPassQuery);
+				
+				dispose();
+				
+			} catch (Exception exc) {
+				exc.printStackTrace();
+			}
 		}
 	}
-}			
+}
