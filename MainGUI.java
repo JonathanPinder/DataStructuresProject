@@ -3,19 +3,23 @@
 	This should update and display the users info
 */
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
-import javax.swing.*;
-import javax.swing.event.*;
-import java.util.*;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
 public class MainGUI extends JFrame {
+	private static ArrayList<Float> expenseValue;
+	private static ArrayList<String> expenseName;
 
 	// Strings are used to access database
 	private String username;
@@ -39,6 +43,9 @@ public class MainGUI extends JFrame {
 	final int FRAME_LENGTH;
 
 	public MainGUI(String username, String password) {
+		
+		expenseName = new ArrayList<String>();
+		expenseValue = new ArrayList<Float>();
 
 		this.username = username;
 		this.password = password;
@@ -103,6 +110,7 @@ public class MainGUI extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setResizable(false);
 
+		getContentPane().setBackground(Color.WHITE);
 		setVisible(true);
 	}
 
@@ -211,24 +219,72 @@ public class MainGUI extends JFrame {
 		}
 	}
 
-	// displayButton should get the users data from database
-	// The users username and passwords is pass through the login and stored
-	// in variable username and variable password
-	private class displayButton implements ActionListener {
-		public void actionPerformed(ActionEvent e) {
+	public static void getExpenseName(String user, String expense) {
 
-			String savings = getSavings(username);
-			String salary = getSalary(username);
-			String name = getName(username);
-			float monthlySalary = Float.parseFloat(salary) / 12;
-			float monthlySavings = monthlySalary - Float.parseFloat(savings);
+		try {
+			String url = "jdbc:sqlserver://localhost:1433;databaseName=App_DB;integratedSecurity=true;";
+			Connection conn = DriverManager.getConnection(url);
+			Statement sta = conn.createStatement();
 
-			// This is a test that prints the username and password
-			viewGoalsArea.setText("Hello " + name + "\n" + "This is your current yearly salary: " + salary + "\n"
-					+ "This is your current savings goal: " + savings + "\n" + "This is your monthly savings: " + monthlySavings);
+			String query = "select " + expense + " from " + user;
+			ResultSet in = sta.executeQuery(query);
 
-			// Use viewGoalsArea.setText("Some string"); to display in text area
+			while (in.next()) {
+				user = in.getString("Expense_Name");
+				expenseName.add(user);
+			}
+		} catch (Exception exc) {
+			exc.printStackTrace();
 		}
 	}
+	
+	public static void getExpenseValue(String user) {
 
+		try {
+			// Get a connection to a database and create a statement
+			String url = "jdbc:sqlserver://localhost:1433;databaseName=App_DB;integratedSecurity=true;";
+			Connection conn = DriverManager.getConnection(url);
+			Statement sta = conn.createStatement();
+
+			for(int j = 0; j < expenseName.size(); j++) {
+			String getExp = "select " + expenseName.get(j) + " from " + user;
+			ResultSet in = sta.executeQuery(getExp);
+			
+			while (in.next()) {
+				float i = in.getFloat(expenseName.get(j));
+				expenseValue.add(i);
+			}
+			}
+		} catch (Exception exc) {
+			exc.printStackTrace();
+		}
+	}
+	
+	public static String getAllExpense() {
+		String out = "";
+		for(int i = 0; i < expenseName.size(); i++) {
+			out = expenseName.get(i) + " = " + expenseValue.get(i) + "\n";
+		}
+		return out;
+	}
+	
+	
+
+	private class displayButton implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+
+            String savings = getSavings(username);
+            String salary = getSalary(username);
+            String name = getName(username);
+            float monthlySalary = Float.parseFloat(salary) / 12;
+            float monthlySavings = 12 * Float.parseFloat(savings);
+
+            // This is a test that prints the username and password
+            viewGoalsArea.setText("\tHello " + name + "\n" + "This is your current yearly salary: " + salary + "\n"
+                    + "This is your current savings goal: " + savings + "\n" + "This is how much you can save a year : "
+                    + monthlySavings);
+
+            // Use viewGoalsArea.setText("Some string"); to display in text area
+		}
+	}
 }

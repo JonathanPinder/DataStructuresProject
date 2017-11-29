@@ -11,6 +11,9 @@ import java.sql.Statement;
 import java.util.Scanner;
 
 public class Expenses extends JFrame {
+	
+	private ArrayList<String> expenseName;
+	int count;
 
 	private String username;
 
@@ -26,6 +29,8 @@ public class Expenses extends JFrame {
 	public Expenses(String username) {
 
 		this.username = username;
+		expenseName = new ArrayList<String>();
+		count = 0;
 
 		FRAME_WIDTH = 300;
 		FRAME_LENGTH = 250;
@@ -59,6 +64,7 @@ public class Expenses extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setResizable(false);
 
+		getContentPane().setBackground(Color.WHITE);
 		setVisible(true);
 
 	}
@@ -91,7 +97,7 @@ public class Expenses extends JFrame {
 			Connection conn = DriverManager.getConnection(url);
 			Statement sta = conn.createStatement();
 
-			String getSalary = "select Monthly_Salary from " + user + " where ID = 1";
+			String getSalary = "select Monthly_Salary from " + user;
 			ResultSet in = sta.executeQuery(getSalary);
 
 			while (in.next()) {
@@ -150,6 +156,21 @@ public class Expenses extends JFrame {
 			dispose();
 		}
 	}
+	
+	public static void addExpenseName(String user, String expense) {
+		try {
+			// Get a connection to a database and create a statement
+			String url = "jdbc:sqlserver://localhost:1433;databaseName=App_DB;integratedSecurity=true;";
+			Connection conn = DriverManager.getConnection(url);
+			Statement sta = conn.createStatement();	
+		
+			String query = "update " + user + " set Expense_Name = " + "'" + expense + "'" + " where ID = 1";
+			boolean in = sta.execute(query);
+			
+		} catch (Exception exc) {
+			exc.printStackTrace();
+		}
+	}
 
 	private class addButton implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
@@ -162,8 +183,12 @@ public class Expenses extends JFrame {
 				String expense = nameText.getText();
 				createExpense(username, expense);
 				
+				expenseName.add(expense); //add the expense name to the array list
+				addExpenseName(username, expense); //enter the expense name into the db
+			
 				float expense_values = Float.parseFloat(valueText.getText());
 				updateExpenseAmount(username, expense, expense_values);
+				count++;
 
 			} catch (Exception exc) {
 				exc.printStackTrace();
